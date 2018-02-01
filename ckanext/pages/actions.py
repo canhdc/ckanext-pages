@@ -54,6 +54,7 @@ schema = {
               unicode],
     'private': [p.toolkit.get_validator('ignore_missing'),
                 p.toolkit.get_validator('boolean_validator')],
+    'lang': [p.toolkit.get_validator('ignore_missing')],
     'group_id': [p.toolkit.get_validator('ignore_missing'), unicode],
     'user_id': [p.toolkit.get_validator('ignore_missing'), unicode],
     'created': [p.toolkit.get_validator('ignore_missing'),
@@ -67,11 +68,16 @@ schema = {
 def _pages_show(context, data_dict):
     if db.pages_table is None:
         db.init_db(context['model'])
+
     org_id = data_dict.get('org_id')
     page = data_dict.get('page')
-    out = db.Page.get(group_id=org_id, name=page)
+    lang = data_dict.get('lang')
+
+    out = db.Page.get(group_id=org_id, name=page, lang=lang or '')
+
     if out:
         out = db.table_dictize(out, context)
+
     return out
 
 
@@ -153,21 +159,41 @@ def _pages_update(context, data_dict):
     if errors:
         raise p.toolkit.ValidationError(errors)
 
-    out = db.Page.get(group_id=org_id, name=page)
+    out = db.Page.get(
+        group_id=org_id,
+        name=page,
+        lang=data_dict.get('lang', '')
+    )
+
     if not out:
         out = db.Page()
         out.group_id = org_id
         out.name = page
-    items = ['title', 'content', 'name', 'private',
-             'order', 'page_type', 'publish_date']
+
+    items = [
+        'title',
+        'content',
+        'name',
+        'private',
+        'order',
+        'page_type',
+        'publish_date',
+        'lang'
+    ]
+
     for item in items:
-        setattr(out, item, data.get(item,'page' if item =='page_type' else None)) #backward compatible with older version where page_type does not exist
+        setattr(
+            out, 
+            item,
+            data.get(item,'page' if item =='page_type' else None)
+        )
 
     extras = {}
     extra_keys = set(schema.keys()) - set(items + ['id', 'created'])
     for key in extra_keys:
         if key in data:
             extras[key] = data.get(key)
+
     out.extras = json.dumps(extras)
 
     out.modified = datetime.datetime.utcnow()

@@ -71,6 +71,17 @@
     </div>
   </div>
 
+  <div class="control-group">
+    <label for="field-private" class="control-label">{{ _('Language') }}</label>
+    <div class="controls">
+      <select id="field-lang" class="form-control" name="lang">
+        {% for option in ['en', 'fr'] %}
+        <option value="{{ option }}" {% if option == data.lang %}selected="selected"{% endif %}>{{ option }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
   {% if not hide_field_order %}
     <div class="control-group">
       <label for="field-order" class="control-label">{{ _('Menu Order') }}</label>

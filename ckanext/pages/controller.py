@@ -281,8 +281,11 @@ class PagesController(p.toolkit.BaseController):
         if not page:
             return self._pages_list_pages(page_type)
         _page = p.toolkit.get_action('ckanext_pages_show')(
-            data_dict={'org_id': None,
-                       'page': page}
+            data_dict={
+                'org_id': None,
+                 'page': page,
+                 'lang': helpers.lang()
+            }
         )
         if _page is None:
             return self._pages_list_pages(page_type)
@@ -339,10 +342,15 @@ class PagesController(p.toolkit.BaseController):
     def pages_edit(self, page=None, data=None, errors=None, error_summary=None, page_type='pages'):
         if page:
             page = page[1:]
+
         _page = p.toolkit.get_action('ckanext_pages_show')(
-            data_dict={'org_id': None,
-                       'page': page,}
+            data_dict={
+                'org_id': None,
+                'page': page,
+                'lang': helpers.lang()
+            }
         )
+
         if _page is None:
             _page = {}
 
